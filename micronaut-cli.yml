@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: com.bbbang.luck
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: gradle
+features: [app-name, cache-caffeine, data, data-hibernate-reactive, graalvm, gradle, http-client-test, jackson-databind, junit, kapt, kotlin, kotlin-application, kotlin-extension-functions, logback, micronaut-aot, micronaut-build, micronaut-http-validation, netty-server, openapi, postgres, reactor, readme, redis-lettuce, security-annotations, security-jwt, shade, swagger-ui, test-resources, vertx-pg-client, views-fieldset, views-thymeleaf, yaml, yaml-build]

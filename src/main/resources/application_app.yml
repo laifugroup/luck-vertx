@@ -1,0 +1,172 @@
+redis:
+  uri: redis://127.0.0.1:6379
+
+micronaut:
+  application:
+    name: luck-vertx
+  caches:
+    headlines:
+      charset: 'UTF-8'
+      maximum-size: 100
+  server:
+    port: 1960
+    cors:
+      enabled: true
+      configurations:
+        all:
+          maxAge: 3600 # 1h
+          allowCredentials: true
+          allowedHeaders:
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Methods
+            - Access-Control-Max-Age
+            - Content-Type
+            - Authorization
+            - "*"  #微信公众号开发，不允许 *号
+
+          allowedMethods:
+            - POST
+            - PUT
+            - GET
+            - DELETE
+            - OPTIONS
+            - HEAD
+          allowedOrigins:
+            - http://localhost:3000 # 管理系统
+            - http://localhost:5173 # 管理系统
+            - http://goal.bbbang.ltd # swagger
+            - http://localhost:1920 # swagger
+            - http://lh.bbbang.com:1920 # swagger
+            - http://localhost
+            - http://172.28.96.1:10086 # h5
+            - http://192.168.1.12:10086
+            - https://app.apifox.com
+            - https://luck-app-pro.newbeexx.com
+
+          exposedHeaders:
+            - Access-Control-Allow-Origin
+            - Access-Control-Allow-Headers
+            - Access-Control-Allow-Methods
+            - Access-Control-Max-Age
+            - Content-Type
+            - Authorization
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+      views:
+        paths: classpath:views
+        mapping: /html/**
+  security:
+    enabled: true
+    intercept-url-map:
+      - pattern: /**
+        httpMethod: OPTIONS
+        access:
+          - isAnonymous()
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        access:
+          - isAnonymous()
+      - pattern: /html/**
+        access:
+          - isAnonymous()
+      - pattern: /v1/**
+        access:
+          - isAuthenticated()
+
+    authentication: bearer
+    token:
+      rolesSeparator: ","
+      name-key: "sub"
+      roles-name: "roles"
+      jwt:
+        signatures:
+          jwks: #work good
+            oauth2-vertx:
+              url: ${OAUTH2_KEYS:`http://localhost:1910/keys`}
+              cache-expiration: 3600
+        claims-validators:
+          issuer: "oauth2-vertx"
+          expiration: true
+        enabled: true
+  http:
+    client:
+      default-charset: UTF-8
+    services:
+      tron:
+        default-charset: utf-8
+        url: ${tron.url}
+        connect-timeout: 50s
+        read-timeout: 20s
+tron:
+  url: "https://api.trongrid.io" # https://api.shasta.trongrid.io    	https://nile.trongrid.io
+  key: "02a48b5d-adfe-41aa-acf0-a1785cb7354d"
+  contractAddress: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" # 测试网络 nile USDT TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf
+  rechargeAddress: ${RECHARGE_ADDRESS:`TNK4E772yP6t7xFfZMMLfKQ6pJrByLk5yt`}
+jpa:
+  default:
+    compile-time-hibernate-proxies: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        hbm2ddl:
+          auto: none # create create-drop update validate none
+        connection:
+          db-type: postgres
+          #url: ${app.db.url:`jdbc:postgresql://coarse-gosling-2563.g95.cockroachlabs.cloud:26257/db2?sslmode=verify-ca`}
+          url: "jdbc:postgresql://${vertx.pg.client.host}:${vertx.pg.client.port}/${vertx.pg.client.database}?ssl=${vertx.pg.client.ssl}&sslmode=${vertx.pg.client.ssl-mode}"
+          driverClassName: org.postgresql.Driver
+          username: ${vertx.pg.client.user}
+          password: ${vertx.pg.client.password}
+        show_sql: true
+        format_sql: true
+    reactive: true
+vertx:
+  pg:
+    client:
+      port: ${APP_DB_PORT:`5432` }
+      host: ${APP_DB_HOST:`localhost` }
+      database: ${app.db.database:`db2` }
+      user: ${APP_DB_USERNAME:`postgres` }
+      password: ${APP_DB_PASSWORD:`DEpn1Y9gM3ys2v6g`}
+      maxSize: 5
+      ssl: false
+      ssl-mode: disable
+
+
+app:
+  luck:
+    bot:
+      creatorId: ${BOT_CREATOR_ID:`430713401`}
+      username: ${BOT_USERNAME:`luck888local_bot`}
+      token: ${BOT_TOKEN:`6968916542:AAFseuM2BiI1WhPI5YvIR32CTMyqYU6qyfU`}
+      desc: ${BOT_DESC:`luck bot`}
+      webhook:
+        internalUrl: ${BOT_WEBHOOK_INTERNAL_URL:`https://proxy.abc.ltd/`}
+        url: ${BOT_WEBHOOK_URL:`https://proxy.abc.ltd/luck/v1/bot/webhook/handleMessage`}
+        secretToken: ${BOT_WEBHOOK_SECRET_TOKEN:`ceq0vd6p2ehd15jkxs62oedq55hu2qq8`}
+    limitBid: ${BET_LIMIT_BID:`5000`}
+    reservePrice:  ${BET_RESERVE_PRICE:`5`}
+    withdrawalLimit:  ${BET_WITHDRAWAL_LIMIT:`10`}
+    odds: ${BET_ODDS:`1.8`}
+    redPackNumbers: ${BET_RED_PACK_NUMBERS:`6`}
+    water: ${BET_WATER:`4`}
+    platformWater: ${BET_PLATFORM_WATER:`2.5`}
+    partnerWater: ${BET_PARTNER_WATER:`1.5`}
+    agentWater: ${BET_AGENT_WATER:`1.5`}
+    inviteRebate: ${BET_INVITE_REBATE:`0.1`}
+    magic: ${app.luck.bot.webhook.secretToken}
+    redPackUrl: ${BET_RED_PACK_URL:`https://proxy.abc.ltd/html/img/luck_boom.jpg`}
+    service:
+      financeBotUserId: ${BOT_FINANCE_USER_ID:`430713401`}
+      finance: ${FINANCE:`https://t.me/luck_caiwu`}
+      playRule: ${PLAY_RULE_SERVICE:`https://t.me/luck_dingyue`}
+      customerService: ${CUSTOMER_SERVICE:`https://t.me/luck_kefu`}

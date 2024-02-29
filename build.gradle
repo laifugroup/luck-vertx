@@ -1,0 +1,137 @@
+plugins {
+    id("org.jetbrains.kotlin.jvm") version "1.9.21"
+    id("org.jetbrains.kotlin.kapt") version "1.9.21"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.9.21"
+    id("org.jetbrains.kotlin.plugin.jpa") version "1.9.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.micronaut.application") version "4.2.1"
+    id("io.micronaut.test-resources") version "4.2.1"
+    id("io.micronaut.aot") version "4.2.1"
+}
+
+version = "1.0.0"
+group = "com.bbbang.luck"
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    google()
+}
+
+dependencies {
+    kapt("io.micronaut.data:micronaut-data-processor")
+    kapt("io.micronaut:micronaut-http-validation")
+    kapt("io.micronaut.openapi:micronaut-openapi")
+    kapt("io.micronaut.security:micronaut-security-annotations")
+
+    kapt "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    kapt("io.micronaut.data:micronaut-data-processor")
+    kaptTest "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    //mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    //--------------------------------------------------------
+    //implementation("com.bbbang.parent:parent-vertx:${parentVersion}")
+    implementation files('./libs/parent-vertx-1.0.0.jar','./libs/platform-license-library-keymgr-1.0.0.jar')
+    implementation("global.namespace.truelicense:truelicense-core:4.0.3")
+    implementation("global.namespace.truelicense:truelicense-api:4.0.3")
+    implementation("global.namespace.truelicense:truelicense-v4:4.0.3")
+    implementation("com.github.oshi:oshi-core:6.4.2")
+    //--------------------------------------------------------
+    implementation("com.ongres.scram:client:2.1")
+    implementation("io.micrometer:context-propagation")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.cache:micronaut-cache-caffeine")
+    implementation("io.micronaut.data:micronaut-data-hibernate-reactive")
+    implementation("io.micronaut.kotlin:micronaut-kotlin-extension-functions")
+    implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    //implementation("io.micronaut.redis:micronaut-redis-lettuce")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.sql:micronaut-vertx-pg-client")
+    implementation("io.micronaut.views:micronaut-views-fieldset")
+    implementation("io.micronaut.views:micronaut-views-thymeleaf")
+    implementation("io.vertx:vertx-pg-client")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+    compileOnly("io.micronaut:micronaut-http-client")
+    compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
+    runtimeOnly("org.yaml:snakeyaml")
+    testImplementation("io.micronaut:micronaut-http-client")
+    testResourcesService("org.postgresql:postgresql")
+    aotPlugins platform("io.micronaut.platform:micronaut-platform:4.2.2")
+    aotPlugins("io.micronaut.security:micronaut-security-aot")
+
+
+    //web3j
+    implementation("org.web3j:core:${web3Core}")
+    //bot
+    implementation("org.telegram:telegrambots:${telegrambots}") {
+        exclude group: 'com.fasterxml.jackson.module', module: 'jackson-module-jaxb-annotations'
+    }
+    implementation("org.telegram:telegrambotsextensions:${telegrambots}")
+    implementation("org.telegram:telegrambots-meta:${telegrambots}")
+    implementation("org.telegram:telegrambots-chat-session-bot:${telegrambots}")
+
+    implementation("org.telegram:telegrambots-abilities:${telegrambots}")
+    //implementation("org.telegram:telegrambots-api:${telegrambots}")
+    //内存队列
+    implementation ("com.lmax:disruptor:3.4.2")
+
+}
+
+
+application {
+    mainClass.set("com.bbbang.luck.LuckApplicationKt")
+}
+java {
+    sourceCompatibility = JavaVersion.toVersion("17")
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.bbbang.luck.*")
+    }
+    testResources {
+        enabled = false // true by default
+        version = "1.0.0" // override Micronaut Test Resources version
+        explicitPort = 15471 // by default, uses a random port
+        inferClasspath = true // true by default
+        additionalModules.add(JDBC_MYSQL) // empty by default
+        // additionalModules.add("hibernate-reactive-postgresql")
+        clientTimeout = 60 // in seconds, maximum time to wait for resources to be available, 60s by default
+        sharedServer = true // false by default
+        sharedServerNamespace = 'custom' // unset by default
+    }
+    aot {
+    // Please review carefully the optimizations enabled below
+    // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+        optimizeServiceLoading = false
+        convertYamlToJava = false
+        precomputeOperations = true
+        cacheEnvironment = true
+        optimizeClassLoading = true
+        deduceEnvironment = true
+        optimizeNetty = true
+        configurationProperties.put("micronaut.security.jwks.enabled","false")
+    }
+}
+
+
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+tasks.withType(ShadowJar) {
+    setZip64(true)
+}

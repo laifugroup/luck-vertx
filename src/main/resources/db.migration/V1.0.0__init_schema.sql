@@ -1,0 +1,4 @@
+-- 需要手动执行
+-- drop schema if  exists "luck";
+-- create schema "luck";
+-- CREATE SCHEMA if  not exists  platform  AUTHORIZATION postgres;
