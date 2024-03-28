@@ -36,6 +36,8 @@ dependencies {
     implementation("global.namespace.truelicense:truelicense-api:4.0.3")
     implementation("global.namespace.truelicense:truelicense-v4:4.0.3")
     implementation("com.github.oshi:oshi-core:6.4.2")
+    //jackson xml依赖 -有时间可以去看看怎么去掉依赖
+    implementation('javax.xml.bind:jaxb-api:2.4.0-b180830.0359')
     //--------------------------------------------------------
     implementation("com.ongres.scram:client:2.1")
     implementation("io.micrometer:context-propagation")

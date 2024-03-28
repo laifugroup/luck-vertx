@@ -129,6 +129,9 @@ jpa:
         show_sql: true
         format_sql: true
     reactive: true
+    entity-scan:
+      packages:
+        - com.bbbang.luck.domain.po
 vertx:
   pg:
     client:
