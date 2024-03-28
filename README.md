@@ -89,5 +89,12 @@ app:
 
 https://t.me/luckhongbao
 
+启动指令
 
-
+````shell
+  使用外部版 application.yml
+  nohup java -Xms256m -Xmx512m   -Dmicronaut.environments=prod -Dmicronaut.config.files=./application.yml    -jar  luck.jar >> luck.log 2>&1 &
+  使用应用内 application.yml
+  nohup java -Xms256m -Xmx512m   -Dmicronaut.environments=prod  -jar  luck.jar >> luck.log 2>&1 &
+   
+````
