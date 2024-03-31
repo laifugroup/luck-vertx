@@ -30,12 +30,13 @@ open class LuckApplicationStartupEventListener: ApplicationEventListener<ServerS
 
 
     override fun onApplicationEvent(event: ServerStartupEvent?) {
-        try {
-            LicenseHelper.verifyLicenseStartUp()
-        }catch (e:Exception){
-            println("[证书]许可已到期或不正确,请向服务商获取新证书。")
-            exitProcess(-1)
-        }
+        //开源版本屏蔽证书验证
+//        try {
+//            LicenseHelper.verifyLicenseStartUp()
+//        }catch (e:Exception){
+//            println("[证书]许可已到期或不正确,请向服务商获取新证书。")
+//            exitProcess(-1)
+//        }
         registerDisruptor()
         registerTelegram()
     }
