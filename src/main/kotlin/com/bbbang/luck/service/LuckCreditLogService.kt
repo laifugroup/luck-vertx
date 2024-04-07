@@ -37,9 +37,8 @@ open class LuckCreditLogService(private val repository: LuckCreditLogRepository)
         val inviteSum=repository.findSumCreditByUserIdAndTypeAndCreatedAtBetween(userId, CreditLogType.INVITE.code,begin,end)
         //下级中雷返点
         val childBoomRebateSum=repository.findSumCreditByUserIdAndTypeAndCreatedAtBetween(userId, CreditLogType.CHILD_BOOM_REBATE.code,begin,end)
-
         return Mono.zip(inviteSum,childBoomRebateSum).map {
-            WaterStatisticsVO()
+            WaterStatisticsVO(inviteSum=it.t1,childBoomRebateSum=it.t2)
         }
     }
 
