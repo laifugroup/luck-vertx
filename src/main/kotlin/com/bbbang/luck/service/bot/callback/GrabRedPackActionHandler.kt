@@ -96,52 +96,6 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
                     if (hasLuck){//已经抢过了，不处理
                         return@flatMap  Mono.empty()
                     }
-                    //扣保证金版
-//                    return@flatMap sendRedPackService.findById(redPackId).flatMap { sendLuck->
-//                          Mono.fromCompletionStage(sessionFactoryStage.withTransaction { session ->
-//                            session.createQuery<Long>("UPDATE LuckWalletPO t SET credit = credit - :credit where userId = :userId")
-//                                .setParameter("credit", oddsCredit)
-//                                .setParameter("userId", wallet.userId)
-//                                .executeUpdate()
-//
-//                              val luckCreditLogPO= LuckCreditLogPO().apply {
-//                                  this.userId = wallet.userId
-//                                  this.credit = -oddsCredit
-//                                  this.creditBefore=wallet.credit
-//                                  this.creditAfter=wallet.credit?.minus(oddsCredit)
-//                                  this.type=CreditLogType.GRAB_RED_PACK_ODDS.code
-//                                  this.remark=CreditLogType.GRAB_RED_PACK_ODDS.desc
-//                              }
-//                              session.persist(luckCreditLogPO)
-//
-//                            val luckGoodLuckPO= LuckGoodLuckPO().apply {
-//                                this.luckRedPackId = redPackId
-//                                this.userId = wallet.userId
-//                                this.boomNumber = boomNumber.toInt()
-//                                this.credit = null
-//                                this.firstName=botUser.firstName
-//                                this.lastName=botUser.lastName
-//                                this.userName=botUser.userName
-//                                this.sendRedPackUserId=sendLuck?.userId
-//                            }
-//                            session.persist(luckGoodLuckPO).thenApply { sendLuck }
-//                        }).flatMap {
-//                              luckGoodLuckService.countByLuckRedPackId(it?.id)
-//                        }.map {
-//                              grabRedPackActionMessage(absSender, callbackQuery, chatId, messageId, it)
-//                              //发布开奖信息
-//                              if (it==luckProperties.redPackNumbers){
-//
-//                                  disruptor.publishEvent(EventTranslator<DivideRedPackEvent> { event, _ ->
-//                                      event.oddsCredit=oddsCredit
-//                                      event.callbackQuery=callbackQuery
-//                                      event.sendRedPackVO=sendLuck
-//                                  })
-//                              }
-//                              sendLuck
-//                          }
-//                    }
-
                     //不扣保证金版本
                     return@flatMap sendRedPackService.findById(redPackId).flatMap { sendLuck->
                         luckGoodLuckService.save(LuckGoodLuckBO().apply {
