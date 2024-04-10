@@ -9,6 +9,7 @@ import com.bbbang.luck.configuration.properties.LuckProperties
 import com.bbbang.luck.configuration.properties.TronProperties
 import com.bbbang.luck.domain.bo.LuckGoodLuckBO
 import com.bbbang.luck.event.DivideRedPackEvent
+import com.bbbang.luck.event.GrabRedPackEvent
 import com.bbbang.luck.service.*
 import com.bbbang.luck.service.wrapper.LuckUserServiceWrapper
 import com.bbbang.parent.utils.BigDecimalUtils
@@ -38,8 +39,7 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
                                //private val creditLogService: LuckCreditLogService,
                                private val sendRedPackService: LuckSendLuckService,
                                private val luckGoodLuckService: LuckGoodLuckService,
-                               private val disruptor: Disruptor<DivideRedPackEvent>
-
+                               private val disruptor: Disruptor<DivideRedPackEvent>,
 ) {
 
 
@@ -114,7 +114,7 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
                     }.flatMap {sendLuck->
                         luckGoodLuckService.countByLuckRedPackId(sendLuck?.id).map { counts->
                             grabRedPackActionMessage(absSender, callbackQuery, chatId, messageId, counts)
-                            if (counts==luckProperties.redPackNumbers){
+                            if (counts==luckProperties.redPackNumbers){//抢红包到达6个，开奖
                                 disruptor.publishEvent(EventTranslator<DivideRedPackEvent> { event, _ ->
                                     event.oddsCredit=oddsCredit
                                     event.callbackQuery=callbackQuery

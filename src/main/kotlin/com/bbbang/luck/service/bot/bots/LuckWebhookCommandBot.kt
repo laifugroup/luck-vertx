@@ -77,6 +77,8 @@ class LuckWebhookCommandBot(options: DefaultBotOptions,private val botProperties
     @Inject
     lateinit var grabRedPackActionHandler : GrabRedPackActionHandler
     @Inject
+    lateinit var grabRedPackActionHandler1 : GrabRedPackActionHandler1
+    @Inject
     lateinit var auditActionHandler : AuditActionHandler
 
 
@@ -183,7 +185,7 @@ class LuckWebhookCommandBot(options: DefaultBotOptions,private val botProperties
                         else -> {
                           //抢红包给增加了额外的数据
                             if (data.startsWith(CallBackActionsType.GRAB_RED_PACK.code)) {
-                                grabRedPackActionHandler.grabRedPackHandler(this@LuckWebhookCommandBot, callbackQuery)
+                                grabRedPackActionHandler1.grabRedPackHandlerDisruptor(this@LuckWebhookCommandBot, callbackQuery)
                             }
                         }
                     }

@@ -3,7 +3,10 @@ package com.bbbang.luck
 import com.bbbang.luck.api.bot.allowupdate.AllowedUpdatesType
 import com.bbbang.luck.configuration.properties.BotWebHookProperties
 import com.bbbang.luck.event.DivideRedPackEvent
+import com.bbbang.luck.event.GrabEventHandler
+import com.bbbang.luck.event.GrabRedPackEvent
 import com.bbbang.luck.service.bot.bots.LuckWebhookCommandBot
+import com.bbbang.luck.service.bot.callback.GrabRedPackActionHandler
 import com.bbbang.parent.helper.LicenseHelper
 import com.lmax.disruptor.dsl.Disruptor
 import io.micronaut.context.event.ApplicationEventListener
@@ -27,6 +30,8 @@ open class LuckApplicationStartupEventListener: ApplicationEventListener<ServerS
 
     @Inject
     lateinit var disruptor: Disruptor<DivideRedPackEvent>
+    @Inject
+    lateinit var disruptorGrabRedPackEvent: Disruptor<GrabRedPackEvent>
 
 
     override fun onApplicationEvent(event: ServerStartupEvent?) {
@@ -59,6 +64,7 @@ open class LuckApplicationStartupEventListener: ApplicationEventListener<ServerS
 
     private fun registerDisruptor(){
         disruptor.start()
+        disruptorGrabRedPackEvent.start()
     }
 
 
