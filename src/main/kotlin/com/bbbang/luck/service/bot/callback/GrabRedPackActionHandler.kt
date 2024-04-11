@@ -3,13 +3,11 @@ package com.bbbang.luck.service.bot.callback
 
 import com.bbbang.luck.api.bot.ext.simpleMessage
 import com.bbbang.luck.api.bot.i18n.I18nConstants
-
 import com.bbbang.luck.api.bot.type.*
 import com.bbbang.luck.configuration.properties.LuckProperties
 import com.bbbang.luck.configuration.properties.TronProperties
 import com.bbbang.luck.domain.bo.LuckGoodLuckBO
 import com.bbbang.luck.event.DivideRedPackEvent
-import com.bbbang.luck.event.GrabRedPackEvent
 import com.bbbang.luck.service.*
 import com.bbbang.luck.service.wrapper.LuckUserServiceWrapper
 import com.bbbang.parent.utils.BigDecimalUtils
@@ -17,8 +15,6 @@ import com.lmax.disruptor.EventTranslator
 import com.lmax.disruptor.dsl.Disruptor
 import io.micronaut.context.MessageSource
 import jakarta.inject.Singleton
-import org.hibernate.SessionFactory
-import org.hibernate.reactive.stage.Stage
 import org.telegram.telegrambots.bots.DefaultAbsSender
 import org.telegram.telegrambots.meta.api.methods.ParseMode
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption
@@ -30,16 +26,17 @@ import java.util.concurrent.CompletableFuture
 
 
 @Singleton
-class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
-                               private val tronProperties: TronProperties,
-                              // private val sessionFactory: SessionFactory,
-                               private val luckWalletService: LuckWalletService,
-                               private val messageSource: MessageSource,
-                               private val luckUserServiceWrapper: LuckUserServiceWrapper,
-                               //private val creditLogService: LuckCreditLogService,
-                               private val sendRedPackService: LuckSendLuckService,
-                               private val luckGoodLuckService: LuckGoodLuckService,
-                               private val disruptor: Disruptor<DivideRedPackEvent>,
+class GrabRedPackActionHandler(
+    private val luckProperties: LuckProperties,
+    private val tronProperties: TronProperties,
+    // private val sessionFactory: SessionFactory,
+    private val luckWalletService: LuckWalletService,
+    private val messageSource: MessageSource,
+    private val luckUserServiceWrapper: LuckUserServiceWrapper,
+    //private val creditLogService: LuckCreditLogService,
+    private val sendRedPackService: LuckSendLuckService,
+    private val luckGoodLuckService: LuckGoodLuckService,
+    private val disruptor: Disruptor<DivideRedPackEvent>,
 ) {
 
 
@@ -113,13 +110,16 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
                         }
                     }.flatMap {sendLuck->
                         luckGoodLuckService.countByLuckRedPackId(sendLuck?.id).map { counts->
-                            grabRedPackActionMessage(absSender, callbackQuery, chatId, messageId, counts)
-                            if (counts==luckProperties.redPackNumbers){//抢红包到达6个，开奖
-                                disruptor.publishEvent(EventTranslator<DivideRedPackEvent> { event, _ ->
-                                    event.oddsCredit=oddsCredit
-                                    event.callbackQuery=callbackQuery
-                                    event.sendRedPackVO=sendLuck
-                                })
+                        val sendMessageResult=    grabRedPackActionMessage(absSender, callbackQuery, chatId, messageId, counts)
+                            // 必须变更完成后，再执行开奖 注意：定时任务,巡查没有开奖 未作
+                            sendMessageResult.whenComplete { _, ex ->
+                                    if (counts==luckProperties.redPackNumbers){//抢红包到达6个，开奖
+                                        disruptor.publishEvent(EventTranslator<DivideRedPackEvent> { event, _ ->
+                                            event.oddsCredit=oddsCredit
+                                            event.callbackQuery=callbackQuery
+                                            event.sendRedPackVO=sendLuck
+                                        })
+                                    }
                             }
                         }
                     }
@@ -137,7 +137,8 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
         callbackQuery: CallbackQuery,
         chatId: Long,
         messageId: Int,
-        addGrabNumber: Int? = 0, ): CompletableFuture<Serializable> {
+        addGrabNumber: Int? = 0,
+    ): CompletableFuture<Serializable> {
         callbackQuery.message.replyToMessage
         val fromId=callbackQuery.message.replyToMessage.from.id
         val firstName=callbackQuery.message.replyToMessage.from.firstName
@@ -170,7 +171,8 @@ class GrabRedPackActionHandler(private val luckProperties: LuckProperties,
             .replyMarkup(replyMarkup)
             .build()
 
-        val result=absSender.executeAsync(editMessage)
+        val result:CompletableFuture<Serializable> =absSender.executeAsync(editMessage)
+
         return result
     }
 
