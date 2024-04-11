@@ -30,8 +30,8 @@ open class LuckApplicationStartupEventListener: ApplicationEventListener<ServerS
 
     @Inject
     lateinit var disruptor: Disruptor<DivideRedPackEvent>
-    @Inject
-    lateinit var disruptorGrabRedPackEvent: Disruptor<GrabRedPackEvent>
+    //@Inject
+    //lateinit var disruptorGrabRedPackEvent: Disruptor<GrabRedPackEvent>
 
 
     override fun onApplicationEvent(event: ServerStartupEvent?) {
@@ -64,7 +64,7 @@ open class LuckApplicationStartupEventListener: ApplicationEventListener<ServerS
 
     private fun registerDisruptor(){
         disruptor.start()
-        disruptorGrabRedPackEvent.start()
+       // disruptorGrabRedPackEvent.start()
     }
 
 
